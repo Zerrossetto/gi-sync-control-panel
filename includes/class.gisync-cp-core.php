@@ -8,7 +8,7 @@
  */
  class GISync_CP_Plugin {
 
-     const PREFIX = 'gisync_cp_';
+     const PREFIX = 'gisync_cp';
 
      public static function activation() {
 
@@ -27,12 +27,25 @@
          write_log( 'uninstall in progress' );
      }
 
+     public static function admin_menu() {
+         add_management_page(
+             'GI Sync Control Panel',
+             'GI Sync Control Panel',
+             'manage_options',
+             GISYNCCP_DIR . '/admin/view.php',
+             null
+         );
+     }
+
      public static function add_hooks() {
+
          if ( is_admin() ) {
              GISync_CP_Plugin::hook( 'activation' );
              GISync_CP_Plugin::hook( 'deactivation' );
              GISync_CP_Plugin::hook( 'uninstall' );
         }
+
+        add_action( 'admin_menu', array( 'GISync_CP_Plugin', 'admin_menu') );
      }
 
      private static function hook( $hook ) {
