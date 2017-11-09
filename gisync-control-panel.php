@@ -39,5 +39,5 @@ if ( !function_exists( 'write_log' ) ) {
    }
 }
 
-require_once( GISYNCCP_DIR . 'class.gisync-cp-core.php' );
+require_once( GISYNCCP_DIR . '/includes/class.gisync-cp-core.php' );
 GISync_CP_Plugin::add_hooks();

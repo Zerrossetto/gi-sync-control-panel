@@ -8,7 +8,7 @@
  */
  class GISync_CP_Plugin {
 
-     const TABLE_PREFIX = 'gisync_';
+     const PREFIX = 'gisync_cp_';
 
      public static function activation() {
 
