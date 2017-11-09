@@ -29,8 +29,8 @@
 
      public static function admin_menu() {
          add_management_page(
-             'GI Sync Control Panel',
-             'GI Sync Control Panel',
+             'GI Sync',
+             'GI Sync',
              'manage_options',
              GISYNCCP_DIR . '/admin/view.php',
              null
