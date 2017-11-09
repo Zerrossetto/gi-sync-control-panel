@@ -10,13 +10,13 @@
 
      const TABLE_PREFIX = 'gisync_';
 
-     public static function activate() {
+     public static function activation() {
 
          // check if tables exist
          write_log( 'activation in progress' );
      }
 
-     public static function deactivate() {
+     public static function deactivation() {
 
          write_log( 'deactivation in progress' );
      }
@@ -28,8 +28,15 @@
      }
 
      public static function add_hooks() {
-         register_activation_hook( GISYNCCP_FILE, array( 'GISync_CP_Plugin', 'activate') );
-         register_deactivation_hook( GISYNCCP_FILE, array( 'GISync_CP_Plugin', 'deactivate') );
-         register_uninstall_hook( GISYNCCP_FILE, array( 'GISync_CP_Plugin', 'uninstall') );
+         if ( is_admin() ) {
+             GISync_CP_Plugin::hook( 'activation' );
+             GISync_CP_Plugin::hook( 'deactivation' );
+             GISync_CP_Plugin::hook( 'uninstall' );
+        }
+     }
+
+     private static function hook( $hook ) {
+         $hook_function = 'register_'. $hook .'_hook';
+         $hook_function( GISYNCCP_FILE, array( 'GISync_CP_Plugin', $hook ) );
      }
  }
