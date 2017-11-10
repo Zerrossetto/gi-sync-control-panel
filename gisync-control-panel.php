@@ -26,18 +26,25 @@ if ( !defined( 'GISYNCCP_DIR' ) ) {
 	define( 'GISYNCCP_DIR', plugin_dir_path( __FILE__ )  );
 }
 
-// write_log facility
-if ( !function_exists( 'write_log' ) ) {
-   function write_log ( $log )  {
-      if ( !WP_DEBUG ) {
-		  // does nothing at all
-	  } else if ( is_array( $log ) || is_object( $log ) ) {
-         error_log( print_r( $log, true ) );
-	 } else {
-         error_log( $log );
-	 }
-   }
-}
+//require_once GISYNCCP_DIR . '/includes/gisync-cp-plugin.php';
 
-require_once( GISYNCCP_DIR . '/includes/class.gisync-cp-core.php' );
-GISync_CP_Plugin::add_hooks();
+(function () {
+
+	spl_autoload_register(function ($class) {
+    	$prefix = 'GISyncCP\\';
+    	$base_dir = GISYNCCP_DIR . 'includes/';
+    	$len = strlen($prefix);
+    	if (strncmp($prefix, $class, $len) !== 0) return;
+    	$relative_class =  strtolower( substr($class, $len) );
+    	$file = $base_dir . 'gisync-cp-' . str_replace('\\', '/', $relative_class ) . '.php';
+	    if (file_exists($file)) require_once $file;
+	});
+
+	// write_log facility
+	//if ( !function_exists( 'write_log' ) ) {
+	//	function write_log ( $log ) { GISync_CP_Utils::write_log ( $log ); }
+	//}
+
+    $plugin = new GISyncCP\Plugin();
+    $plugin->bind_hooks();
+})();
