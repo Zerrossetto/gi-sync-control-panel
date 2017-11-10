@@ -26,24 +26,22 @@ if ( !defined( 'GISYNCCP_DIR' ) ) {
 	define( 'GISYNCCP_DIR', plugin_dir_path( __FILE__ )  );
 }
 
-//require_once GISYNCCP_DIR . '/includes/gisync-cp-plugin.php';
-
 (function () {
 
+	// PHP-FIG PSR-4 specification compliant autoloader
 	spl_autoload_register(function ($class) {
     	$prefix = 'GISyncCP\\';
     	$base_dir = GISYNCCP_DIR . 'includes/';
     	$len = strlen($prefix);
     	if (strncmp($prefix, $class, $len) !== 0) return;
     	$relative_class =  strtolower( substr($class, $len) );
-    	$file = $base_dir . 'gisync-cp-' . str_replace('\\', '/', $relative_class ) . '.php';
+    	$file = sprintf(
+			'%sclass.gisync-cp-%s.php',
+			$base_dir,
+			str_replace('\\', '/', $relative_class )
+		);
 	    if (file_exists($file)) require_once $file;
 	});
-
-	// write_log facility
-	//if ( !function_exists( 'write_log' ) ) {
-	//	function write_log ( $log ) { GISync_CP_Utils::write_log ( $log ); }
-	//}
 
     $plugin = new GISyncCP\Plugin();
     $plugin->bind_hooks();
