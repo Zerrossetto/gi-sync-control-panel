@@ -1,8 +1,8 @@
 <?php
-namespace GISyncCP;
+namespace GISyncCP\Utils;
 
-class Utils {
-    public static function write_log ( $log )  {
+trait Logging {
+    public static function debug ( $log )  {
        if ( WP_DEBUG ) {
 
           $caller = debug_backtrace()[1];
@@ -20,5 +20,4 @@ class Utils {
           error_log( $to_log );
        }
     }
-
 }

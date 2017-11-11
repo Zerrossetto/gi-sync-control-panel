@@ -8,9 +8,8 @@
  */
  namespace GISyncCP;
 
- use GISyncCP\Utils as utils;
-
  class Plugin {
+     use Utils\Logging;
 
      const PREFIX = 'gisync_cp';
 
@@ -40,36 +39,59 @@
      }
 
      public static function activation() {
-         utils::write_log( 'begin' );
+         Plugin::debug( 'begin' );
 
          $key = Plugin::PREFIX . '_version';
          $installed_version = get_option( $key );
-         utils::write_log( 'plugin version ' .  $installed_version ?: 'fist install' );
+         Plugin::debug( 'plugin version ' .  $installed_version ?: 'fist install' );
 
          if ( strcmp( $installed_version, Plugin::VERSION ) < 0 ) {
-            utils::write_log( 'Starting plugin structure upgrade' );
+            Plugin::debug( 'Starting plugin structure upgrade' );
             //add_option( $key, Plugin::VERSION );
         }
-         //add_option( $key, $this->version );
-         /*register_setting(
-             Plugin::PREFIX,
-             Plugin::PREFIX . '_options'
-         );*/
          // check if tables exist
-         utils::write_log( 'end' );
+         Plugin::debug( 'end' );
      }
 
      public static function deactivation() {
 
-         utils::write_log( 'begin' );
+         Plugin::debug( 'begin' );
          //technically should do nothing
-         utils::write_log( 'end' );
+         Plugin::debug( 'end' );
      }
 
      public static function uninstall() {
-         utils::write_log( 'begin' );
+         Plugin::debug( 'begin' );
          // delete existing tables
-         utils::write_log( 'end' );
+         Plugin::debug( 'end' );
+     }
+
+     public function settings_panel() {
+        Plugin::debug( 'begin' );
+
+        $key = $this->setting( 'test_options' );
+
+        register_setting('reading', $key);
+        add_settings_section(
+            Plugin::PREFIX . '_settings_section',
+            'Gi Sync Settings Section',
+            function () {
+                echo '<p>GISync Panel Section Introduction.</p>';
+            },
+            'reading'
+        );
+        add_settings_field(
+            Plugin::PREFIX . '_settings_field',
+            'GI Sync Setting',
+            function () {
+                $setting = get_option( $key ) ?: '';
+                echo '<input type="text" name="'.$key.'" value="'.esc_attr($setting).'"s/>';
+            },
+            'reading',
+            Plugin::PREFIX . '_settings_section'
+        );
+
+        Plugin::debug( 'end' );
      }
 
      public function admin_menu() {
@@ -77,7 +99,7 @@
              'GI Sync',
              'GI Sync',
              'manage_options',
-             GISYNCCP_DIR . '/admin/settings.php',
+             plugin_dir_path( GISYNCCP_FILE ) . '/admin/settings.php',
              null
          );
      }
@@ -91,10 +113,15 @@
         }
 
         add_action( 'admin_menu', array( $this, 'admin_menu') );
+        add_action( 'admin_init', array( $this, 'settings_panel') );
      }
 
      private static function bind_hook_internal( $hook ) {
          $hook_function = 'register_'. $hook .'_hook';
          $hook_function( GISYNCCP_FILE, array( __CLASS__, $hook ) );
+     }
+
+     private static function setting( $setting_name ) {
+         return Plugin::PREFIX . '_' . $setting_name;
      }
  }

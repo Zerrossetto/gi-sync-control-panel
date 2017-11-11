@@ -21,27 +21,25 @@ if ( !defined( 'GISYNCCP_FILE' ) ) {
 	define( 'GISYNCCP_FILE', __FILE__  );
 }
 
-// Define GISYNCCP_DIR
-if ( !defined( 'GISYNCCP_DIR' ) ) {
-	define( 'GISYNCCP_DIR', plugin_dir_path( __FILE__ )  );
-}
-
 (function () {
 
 	// PHP-FIG PSR-4 specification compliant autoloader
-	spl_autoload_register(function ($class) {
+	spl_autoload_register( function ($class) {
+		if ( class_exists( $class ) ) return;
     	$prefix = 'GISyncCP\\';
-    	$base_dir = GISYNCCP_DIR . 'includes/';
-    	$len = strlen($prefix);
-    	if (strncmp($prefix, $class, $len) !== 0) return;
-    	$relative_class =  strtolower( substr($class, $len) );
-    	$file = sprintf(
-			'%sclass.gisync-cp-%s.php',
-			$base_dir,
-			str_replace('\\', '/', $relative_class )
+    	$len = strlen( $prefix );
+    	if ( strncmp( $prefix, $class, $len ) !== 0 ) return;
+		$class = strtolower( substr( $class, $len ) );
+		$path = array_merge(
+			preg_split( '#/#', plugin_dir_path( __FILE__ ), -1, PREG_SPLIT_NO_EMPTY ),
+			array( 'includes' ),
+			preg_split( '#\\\\#', $class, -1, PREG_SPLIT_NO_EMPTY )
 		);
-	    if (file_exists($file)) require_once $file;
-	});
+		$last = count( $path ) - 1;
+    	$path[ $last ] = 'class.gisync-cp-' . $path[ $last ] . '.php';
+    	$file = '/' . implode( '/', $path );
+	    if ( file_exists( $file ) ) require_once $file;
+	} );
 
     $plugin = new GISyncCP\Plugin();
     $plugin->bind_hooks();
