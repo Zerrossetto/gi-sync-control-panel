@@ -39,7 +39,6 @@
      }
 
      public static function activation() {
-         Plugin::debug( 'begin' );
 
          $key = Plugin::PREFIX . '_version';
          $installed_version = get_option( $key );
@@ -49,47 +48,22 @@
             Plugin::debug( 'Starting plugin structure upgrade' );
             //add_option( $key, Plugin::VERSION );
         }
-         // check if tables exist
-         Plugin::debug( 'end' );
      }
 
      public static function deactivation() {
-
-         Plugin::debug( 'begin' );
          //technically should do nothing
-         Plugin::debug( 'end' );
      }
 
      public static function uninstall() {
-         Plugin::debug( 'begin' );
          // delete existing tables
-         Plugin::debug( 'end' );
      }
 
      public function settings_panel() {
-        Plugin::debug( 'begin' );
 
-        $key = $this->setting( 'test_options' );
-
-        register_setting('reading', $key);
-        add_settings_section(
-            Plugin::PREFIX . '_settings_section',
-            'Gi Sync Settings Section',
-            function () {
-                echo '<p>GISync Panel Section Introduction.</p>';
-            },
-            'reading'
-        );
-        add_settings_field(
-            Plugin::PREFIX . '_settings_field',
-            'GI Sync Setting',
-            function () {
-                $setting = get_option( $key ) ?: '';
-                echo '<input type="text" name="'.$key.'" value="'.esc_attr($setting).'"s/>';
-            },
-            'reading',
-            Plugin::PREFIX . '_settings_section'
-        );
+         $settings = new SettingsModel(
+             plugin_dir_path( GISYNCCP_FILE ).'includes/data/setting-fields.yaml'
+         );
+         $settings->generate_page();
 
         Plugin::debug( 'end' );
      }
@@ -121,7 +95,7 @@
          $hook_function( GISYNCCP_FILE, array( __CLASS__, $hook ) );
      }
 
-     private static function setting( $setting_name ) {
+     public static function prefix( $setting_name ) {
          return Plugin::PREFIX . '_' . $setting_name;
      }
  }

@@ -25,19 +25,19 @@ if ( !defined( 'GISYNCCP_FILE' ) ) {
 
 	// PHP-FIG PSR-4 specification compliant autoloader
 	spl_autoload_register( function ($class) {
-		if ( class_exists( $class ) ) return;
-    	$prefix = 'GISyncCP\\';
-    	$len = strlen( $prefix );
-    	if ( strncmp( $prefix, $class, $len ) !== 0 ) return;
-		$class = strtolower( substr( $class, $len ) );
-		$path = array_merge(
-			preg_split( '#/#', plugin_dir_path( __FILE__ ), -1, PREG_SPLIT_NO_EMPTY ),
-			array( 'includes' ),
-			preg_split( '#\\\\#', $class, -1, PREG_SPLIT_NO_EMPTY )
-		);
-		$last = count( $path ) - 1;
-    	$path[ $last ] = 'class.gisync-cp-' . $path[ $last ] . '.php';
-    	$file = '/' . implode( '/', $path );
+	    if ( class_exists( $class ) ) return;
+	    $prefix = 'GISyncCP\\';
+	    $len = strlen( $prefix );
+	    if ( strncmp( $prefix, $class, $len ) !== 0 ) return;
+	    $class = strtolower( substr( $class, $len ) );
+	    $path = array_merge(
+	        preg_split( '#/#', plugin_dir_path( __FILE__ ), -1, PREG_SPLIT_NO_EMPTY ),
+	        array( 'includes' ),
+	        preg_split( '#\\\\#', $class, -1, PREG_SPLIT_NO_EMPTY )
+	    );
+	    $last = count( $path ) - 1;
+	    $path[ $last ] = 'class.gisync-cp-' . $path[ $last ] . '.php';
+	    $file = '/' . implode( '/', $path );
 	    if ( file_exists( $file ) ) require_once $file;
 	} );
 
