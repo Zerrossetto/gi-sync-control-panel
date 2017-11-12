@@ -54,14 +54,14 @@ class DOMBuilder {
         return $this;
     }
 
-    function withCheckboxElements( &$checkboxes, $group = NULL ) {
+    function withCheckboxElements( &$group, &$checkboxes, $prefix = NULL ) {
+
         foreach ( $checkboxes as $name => $checked ) {
 
-            $container = $this->doc->createElement( 'div' );
-            $text = $this->doc->createTextNode( $name );
+            $span = $this->doc->createElement( 'span', $name );
 
             if ( isset( $group ) )
-                $name = $group . '[' . $name . ']' ;
+                $name = $prefix . '[' . $group . ']' .'[' . $name . ']' ;
 
             $label = $this->doc->createElement( 'label' );
             $label->setAttribute( 'for', $name );
@@ -73,10 +73,10 @@ class DOMBuilder {
             if ( $checked )
                 $checkbox->setAttribute( 'checked', 'checked' );
 
-            $label->appendChild( $text );
-            $container->appendChild( $label );
-            $container->appendChild( $checkbox );
-            $this->node->appendChild( $container );
+            $label->appendChild( $span );
+            $label->appendChild( $checkbox );
+
+            $this->node->appendChild( $label );
         }
         return $this;
     }

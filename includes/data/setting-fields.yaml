@@ -4,13 +4,13 @@ prefix: gisync_cp
 description: Global settings for GI Sync Process
 show_in_rest: true
 page: gisync_cp_settings
+settings_key: gisync_cp_options
 validation_callback:
 - GISyncCP\SettingsModel
 - validate_settings
 sections:
 - id: gisync_cp_section_general
   title: General settings
-  settings_key: gisync_cp_general
   callback:
   - GISyncCP\SettingsModel
   - general_section_callback
@@ -29,8 +29,9 @@ sections:
       label_for: connection_timeout
       class: gisync_cp_field
 - id: gisync_cp_agency_san_michele
+  type: agencies
+  agency_sequence: 0
   title: Impostazioni Agenzia San Michele
-  settings_key: gisync_cp_agencies[0]
   callback:
   - GISyncCP\SettingsModel
   - agency_section_callback
@@ -43,7 +44,8 @@ sections:
     args:
       label_for: gi_id
       class: gisync_cp_field
-      value: 123fantecavallo
+      default_value: 123fantecavallo
+      array_path: [ agencies, 0 ]
   - id: agency_homepage
     title: Agency Homepage
     callback:
@@ -52,22 +54,25 @@ sections:
     args:
       label_for: agency_homepage
       class: gisync_cp_field
+      array_path: [ agencies, 0 ]
   - id: description
     title: Agency description
     callback:
     - GISyncCP\SettingsModel
-    - disabled_field_callback
+    - default_field_callback
     args:
       label_for: description
       class: gisync_cp_field
+      array_path: [ agencies, 0 ]
   - id: export_url
     title: GI Feeds URL
     callback:
     - GISyncCP\SettingsModel
-    - disabled_field_callback
+    - default_field_callback
     args:
       label_for: export_url
       class: gisync_cp_field
+      array_path: [ agencies, 0 ]
   - id: options
     title: Additional export data
     callback:
@@ -76,6 +81,7 @@ sections:
     args:
       label_for: options
       class: gisync_cp_field
+      array_path: [ agencies, 0 ]
       checkbox_fields:
       - i18n
       - video
@@ -99,6 +105,7 @@ sections:
     args:
       label_for: image
       class: gisync_cp_field
+      array_path: [ agencies, 0 ]
       checkbox_fields:
       - resize
       - normalize

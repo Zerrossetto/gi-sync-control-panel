@@ -25,7 +25,7 @@ class SettingsModel {
      */
     function generate_page() {
 
-        if ( array_key_exists( 'setting_key', $this->data ) ) {
+        if ( array_key_exists( 'settings_key', $this->data ) ) {
             register_setting(
                 $this->data[ 'prefix' ],
                 $this->data[ 'settings_key' ],
@@ -61,21 +61,20 @@ class SettingsModel {
         $old_values = get_option( self::$settings_key );
         $no_errors = TRUE;
 
-        foreach ( array_keys( $values ) as &$field ) {
-            $invoke_target = array( $validator, 'invalid_' . $field );
-            if ( method_exists ( ...$invoke_target ) ) {
-                 if ( $error = call_user_func_array( $invoke_target, array( &$values ) ) ) {
-                    $no_errors = FALSE;
-                    SettingsModel::debug( $error );
-                    add_settings_error(...$error);
-                    if ( array_key_exists( $field, $old_values ) )
-                        $values[ $field ] = $old_values[ $field ];
+        array_walk_recursive(
+            $values,
+            function( $item, $key ) use ( &$values, &$validator, &$old_values, &$no_errors ) {
+                $invoke_target = array( $validator, 'invalid_' . $key );
+                if ( method_exists ( ...$invoke_target ) ) {
+                     if ( $error = call_user_func_array( $invoke_target, array( &$values ) ) ) {
+                        $no_errors = FALSE;
+                        add_settings_error(...$error);
+                        if ( array_key_exists( $key, $old_values ) )
+                            $values[ $key ] = $old_values[ $key ];
+                    }
                 }
-            } else
-                SettingsModel::debug(
-                    "Skipping validation for field '$field' due to undefined validator"
-                );
-        }
+            }
+        );
 
         if ( $no_errors )
             $message = __( 'Settings saved', Plugin::PREFIX );
@@ -98,18 +97,6 @@ class SettingsModel {
      */
     protected function load_section( &$page, &$section ) {
 
-        if ( array_key_exists( 'setting_key', $section ) ) {
-            register_setting(
-                $this->data[ 'prefix' ],
-                $section[ 'settings_key' ],
-                array(
-                    'description' => $this->data[ 'description' ],
-                    'sanitize_callback' => $this->data[ 'validation_callback' ],
-                    'show_in_rest' => $this->data[ 'show_in_rest' ]
-                )
-            );
-        }
-
         if ( array_key_exists( 'callback', $section ) )
             $callback = $section[ 'callback' ];
         else
@@ -126,10 +113,10 @@ class SettingsModel {
      */
     protected function load_field( &$page, &$section, &$field ) {
 
-        if ( array_key_exists( 'settings_key', $section ) )
-            $settings_key = $section[ 'settings_key' ];
-        else
-            $settings_key = $this->data[ 'settings_key' ];
+        $group_key = $this->data[ 'settings_key' ];
+
+        if ( array_key_exists( 'type', $section ) && $section[ 'type' ] === 'agencies' )
+            $group_key = sprintf( '%s[%s][%d]', $group_key, $section[ 'type' ], $section[ 'agency_sequence' ] );
 
         if ( array_key_exists( 'callback', $field ) )
             $callback = $field[ 'callback' ];
@@ -144,7 +131,10 @@ class SettingsModel {
             $section[ 'id' ],
             array_merge(
                 $field[ 'args' ],
-                array( 'settings_key' => $settings_key )
+                array(
+                    'settings_key' => $this->data[ 'settings_key' ],
+                    'group_key' => $group_key
+                )
             )
         );
     }
@@ -154,14 +144,26 @@ class SettingsModel {
 
         $all_settings = get_option( $args[ 'settings_key' ] ) ?: array();
 
+        if ( array_key_exists( 'array_path', $args ) ) {
+            foreach ( $args[ 'array_path' ] as &$index ) {
+                if ( array_key_exists( $index, $all_settings ) )
+                    $all_settings = $all_settings[ $index ];
+            }
+        }
+
         if ( array_key_exists( $args[ 'label_for' ], $all_settings ) )
             $value = $all_settings[ $args[ 'label_for' ] ];
         else
             $value = '';
 
-        return $tag->input()
-                   ->named( $args[ 'label_for' ], $args[ 'settings_key' ] )
-                   ->withValue( $value );
+        $tag->input()
+            ->named( $args[ 'label_for' ], $args[ 'group_key' ] )
+            ->withValue( $value );
+
+        if ( empty( $tag->node->getAttribute( 'value' ) ) && array_key_exists( 'default_value', $args ) )
+             $tag->node->setAttribute( 'value', $args[ 'default_value' ] );
+
+        return $tag;
     }
 
     public static function default_field_callback( $args ) {
@@ -178,6 +180,13 @@ class SettingsModel {
 
         $all_settings = get_option( $args[ 'settings_key' ] ) ?: array();
 
+        if ( array_key_exists( 'array_path', $args ) ) {
+            foreach ( $args[ 'array_path' ] as &$index ) {
+                if ( array_key_exists( $index, $all_settings ) )
+                    $all_settings = $all_settings[ $index ];
+            }
+        }
+
         if ( array_key_exists( $args[ 'label_for' ], $all_settings ) )
             $values = $all_settings[ $args[ 'label_for' ] ];
         else
@@ -188,8 +197,13 @@ class SettingsModel {
                 $values[ $field_name ] = FALSE;
         }
 
+        ksort( $values, SORT_STRING );
+
         echo $builder->divForCheckboxes()
-                     ->withCheckboxElements( $values, $args[ 'settings_key' ] )
+                     ->withCheckboxElements(
+                         $args[ 'label_for' ],
+                         $values,
+                         $args[ 'group_key' ] )
                      ->build();
     }
 }
