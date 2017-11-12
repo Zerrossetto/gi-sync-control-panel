@@ -14,7 +14,7 @@ class SettingsModel {
     function __construct( $yaml, $do_generate_page = FALSE ) {
         $this->data = yaml_parse_file( $yaml );
 
-        self::$settings_key = $this->data[ 'settings_key' ];
+        //self::$settings_key = $this->data[ 'settings_key' ];
 
         if ( $do_generate_page )
             $this->generate_page();
@@ -25,15 +25,17 @@ class SettingsModel {
      */
     function generate_page() {
 
-        register_setting(
-            $this->data[ 'prefix' ],
-            $this->data[ 'settings_key' ],
-            array(
-                'description' => $this->data[ 'description' ],
-                'sanitize_callback' => $this->data[ 'validation_callback' ],
-                'show_in_rest' => $this->data[ 'show_in_rest' ]
-            )
-        );
+        if ( array_key_exists( 'setting_key', $this->data ) ) {
+            register_setting(
+                $this->data[ 'prefix' ],
+                $this->data[ 'settings_key' ],
+                array(
+                    'description' => $this->data[ 'description' ],
+                    'sanitize_callback' => $this->data[ 'validation_callback' ],
+                    'show_in_rest' => $this->data[ 'show_in_rest' ]
+                )
+            );
+        }
 
         foreach ( $this->data[ 'sections' ] as &$section )
             $this->load_section( $this->data[ 'page' ], $section );
@@ -42,28 +44,15 @@ class SettingsModel {
     /**
      *
      */
-    public static function default_section_callback () {
+    public static function general_section_callback () {
         echo '<p>GISync Panel Section Introduction.</p>';
     }
 
     /**
      *
      */
-    public static function default_field_callback( $args ) {
-
-        $tag = new Utils\DOMBuilder();
-
-        $all_settings = get_option( $args[ 'settings_key' ] ) ?: array();
-
-        if ( array_key_exists( $args[ 'label_for' ], $all_settings ) )
-            $value = $all_settings[ $args[ 'label_for' ] ];
-        else
-            $value = '';
-
-        echo $tag->input()
-                 ->named( $args[ 'label_for' ], $args[ 'settings_key' ] )
-                 ->withValue( $value )
-                 ->build();
+    public static function agency_section_callback () {
+        echo '<p>Agencies section</p>';
     }
 
     public static function validate_settings( $values ) {
@@ -109,6 +98,18 @@ class SettingsModel {
      */
     protected function load_section( &$page, &$section ) {
 
+        if ( array_key_exists( 'setting_key', $section ) ) {
+            register_setting(
+                $this->data[ 'prefix' ],
+                $section[ 'settings_key' ],
+                array(
+                    'description' => $this->data[ 'description' ],
+                    'sanitize_callback' => $this->data[ 'validation_callback' ],
+                    'show_in_rest' => $this->data[ 'show_in_rest' ]
+                )
+            );
+        }
+
         if ( array_key_exists( 'callback', $section ) )
             $callback = $section[ 'callback' ];
         else
@@ -117,13 +118,18 @@ class SettingsModel {
         add_settings_section( $section[ 'id' ], $section[ 'title' ], $callback, $page );
 
         foreach ( $section[ 'fields' ] as &$field )
-            $this->load_field( $page, $section[ 'id' ], $field );
+            $this->load_field( $page, $section, $field );
     }
 
     /**
      *
      */
     protected function load_field( &$page, &$section, &$field ) {
+
+        if ( array_key_exists( 'settings_key', $section ) )
+            $settings_key = $section[ 'settings_key' ];
+        else
+            $settings_key = $this->data[ 'settings_key' ];
 
         if ( array_key_exists( 'callback', $field ) )
             $callback = $field[ 'callback' ];
@@ -135,11 +141,55 @@ class SettingsModel {
             $field[ 'title' ],
             $callback,
             $page,
-            $section,
+            $section[ 'id' ],
             array_merge(
                 $field[ 'args' ],
-                array( 'settings_key' => $this->data[ 'settings_key' ] )
+                array( 'settings_key' => $settings_key )
             )
         );
+    }
+
+    private static function prepare_default_input( &$args ) {
+        $tag = new Utils\DOMBuilder();
+
+        $all_settings = get_option( $args[ 'settings_key' ] ) ?: array();
+
+        if ( array_key_exists( $args[ 'label_for' ], $all_settings ) )
+            $value = $all_settings[ $args[ 'label_for' ] ];
+        else
+            $value = '';
+
+        return $tag->input()
+                   ->named( $args[ 'label_for' ], $args[ 'settings_key' ] )
+                   ->withValue( $value );
+    }
+
+    public static function default_field_callback( $args ) {
+        echo self::prepare_default_input( $args )->build();
+    }
+
+    public static function disabled_field_callback ( $args ) {
+        echo self::prepare_default_input( $args )->disabled()->build();
+    }
+
+    public static function checkbox_fields_callback( $args ) {
+
+        $builder = new Utils\DOMBuilder();
+
+        $all_settings = get_option( $args[ 'settings_key' ] ) ?: array();
+
+        if ( array_key_exists( $args[ 'label_for' ], $all_settings ) )
+            $values = $all_settings[ $args[ 'label_for' ] ];
+        else
+            $values = array();
+
+        foreach ( $args[ 'checkbox_fields' ] as &$field_name ) {
+            if ( ! array_key_exists( $field_name, $values ) )
+                $values[ $field_name ] = FALSE;
+        }
+
+        echo $builder->divForCheckboxes()
+                     ->withCheckboxElements( $values, $args[ 'settings_key' ] )
+                     ->build();
     }
 }

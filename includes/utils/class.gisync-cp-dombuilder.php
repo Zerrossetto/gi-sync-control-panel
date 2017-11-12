@@ -20,6 +20,13 @@ class DOMBuilder {
         return $this;
     }
 
+    function divForCheckboxes() {
+        $this->node = $this->doc->createElement( 'div' );
+        $this->node->setAttribute( 'class', 'gisync-checkbox-container' );
+        $this->doc->appendChild( $this->node );
+        return $this;
+    }
+
     function named( $name, $group = NULL ) {
 
         if ( isset( $group ) )
@@ -31,14 +38,46 @@ class DOMBuilder {
 
     function withValue( $value ) {
         if ( empty( $value ) ) {
-            $this->debug(
+            /*$this->debug(
                 $this->node->getAttribute( 'name' ) ?: 'name-not-set',
                 'option, discarding empty or null value'
-            );
+            );*/
             $this->node->setAttribute( 'value', '' );
         } else
             $this->node->setAttribute( 'value', esc_attr( $value ) );
 
+        return $this;
+    }
+
+    function disabled() {
+        $this->node->setAttribute( 'disabled', 'disabled' );
+        return $this;
+    }
+
+    function withCheckboxElements( &$checkboxes, $group = NULL ) {
+        foreach ( $checkboxes as $name => $checked ) {
+
+            $container = $this->doc->createElement( 'div' );
+            $text = $this->doc->createTextNode( $name );
+
+            if ( isset( $group ) )
+                $name = $group . '[' . $name . ']' ;
+
+            $label = $this->doc->createElement( 'label' );
+            $label->setAttribute( 'for', $name );
+
+            $checkbox = $this->doc->createElement( 'input' );
+            $checkbox->setAttribute( 'type', 'checkbox' );
+            $checkbox->setAttribute( 'name', $name );
+            $checkbox->setAttribute( 'value', '1' );
+            if ( $checked )
+                $checkbox->setAttribute( 'checked', 'checked' );
+
+            $label->appendChild( $text );
+            $container->appendChild( $label );
+            $container->appendChild( $checkbox );
+            $this->node->appendChild( $container );
+        }
         return $this;
     }
 

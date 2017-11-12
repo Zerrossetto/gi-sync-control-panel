@@ -54,7 +54,7 @@
                 array( 'back_link' => TRUE )  //arguments
             );
 
-         $key = Plugin::prefix( 'version' );
+         $key = self::prefix( 'version' );
          $installed_version = get_option( $key );
          Plugin::debug( 'plugin version ' .  $installed_version ?: 'fist install' );
 
@@ -82,6 +82,10 @@
      }
 
      public function admin_menu() {
+         wp_register_style(
+             $this->prefix( 'settings_panel' ),
+             plugin_dir_url(GISYNCCP_FILE) . 'admin/css/gisync-control-panel.css'
+         );
          add_management_page(
              'GI Sync',
              'GI Sync',
@@ -89,6 +93,10 @@
              plugin_dir_path( GISYNCCP_FILE ) . '/admin/settings.php',
              null
          );
+     }
+
+     public function enqueue_scripts () {
+         wp_enqueue_style( $this->prefix( 'settings_panel' ) );
      }
 
      public function bind_hooks() {
@@ -101,6 +109,7 @@
 
         add_action( 'admin_menu', array( $this, 'admin_menu') );
         add_action( 'admin_init', array( $this, 'settings_panel') );
+        add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
      }
 
      private static function bind_hook_internal( $hook ) {
@@ -109,6 +118,6 @@
      }
 
      public static function prefix( $setting_name ) {
-         return Plugin::PREFIX . '_' . $setting_name;
+         return self::PREFIX . '_' . $setting_name;
      }
  }

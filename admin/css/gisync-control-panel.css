@@ -1,0 +1,7 @@
+.gisync-checkbox-container {
+    color: red;
+}
+
+.gisync-checkbox-container > div {
+    display: inline-block;
+}
