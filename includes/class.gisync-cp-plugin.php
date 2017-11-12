@@ -99,6 +99,26 @@
          wp_enqueue_style( $this->prefix( 'settings_panel' ) );
      }
 
+     public function rest_endpoint() {
+         $namespace = self::PREFIX . '/v1';
+         register_rest_route(
+             $namespace,
+             '/settings',
+             array(
+                 'methods' => 'GET',
+                 'callback' => array( 'GISyncCP\Rest', 'all_settings' )
+             )
+         );
+         register_rest_route(
+             $namespace,
+             '/agency/(?P<sequence>\d+)',
+             array(
+                 'methods' => 'GET',
+                 'callback' => array( 'GISyncCP\Rest', 'agency_settings' )
+             )
+         );
+     }
+
      public function bind_hooks() {
 
          if ( is_admin() ) {
@@ -110,6 +130,7 @@
         add_action( 'admin_menu', array( $this, 'admin_menu') );
         add_action( 'admin_init', array( $this, 'settings_panel') );
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+        add_action( 'rest_api_init', array( $this, 'rest_endpoint' ) );
      }
 
      private static function bind_hook_internal( $hook ) {
