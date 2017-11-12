@@ -2,7 +2,12 @@
 page_title: GI Sync process settings
 prefix: gisync_cp
 settings_key: gisync_cp_options
+description: Global settings for GI Sync Process
+show_in_rest: true
 page: gisync_cp_settings
+validation_callback:
+- GISyncCP\SettingsModel
+- validate_settings
 sections:
 - id: gisync_cp_section_general
   title: General settings

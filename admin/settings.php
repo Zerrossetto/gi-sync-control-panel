@@ -6,14 +6,6 @@ if ( !current_user_can( 'manage_options' ) ) {
     return;
 }
 
-if (isset( $_GET['settings-updated'] ))
-    add_settings_error(
-        Plugin::prefix( 'messages' ),
-        Plugin::prefix( 'message' ),
-        __( 'Settings Saved', Plugin::PREFIX ),
-        'updated'
-    );
-
 settings_errors( Plugin::prefix( 'messages' ) );
 ?>
 <div class="wrap">

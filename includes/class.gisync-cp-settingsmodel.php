@@ -6,11 +6,15 @@ class SettingsModel {
 
     const START_GENERATE_PAGE = TRUE;
 
+    private static $settings_key;
+
     /**
      *
      */
     function __construct( $yaml, $do_generate_page = FALSE ) {
         $this->data = yaml_parse_file( $yaml );
+
+        self::$settings_key = $this->data[ 'settings_key' ];
 
         if ( $do_generate_page )
             $this->generate_page();
@@ -21,7 +25,15 @@ class SettingsModel {
      */
     function generate_page() {
 
-        register_setting( $this->data[ 'prefix' ], $this->data[ 'settings_key' ] );
+        register_setting(
+            $this->data[ 'prefix' ],
+            $this->data[ 'settings_key' ],
+            array(
+                'description' => $this->data[ 'description' ],
+                'sanitize_callback' => $this->data[ 'validation_callback' ],
+                'show_in_rest' => $this->data[ 'show_in_rest' ]
+            )
+        );
 
         foreach ( $this->data[ 'sections' ] as &$section )
             $this->load_section( $this->data[ 'page' ], $section );
@@ -52,6 +64,44 @@ class SettingsModel {
                  ->named( $args[ 'label_for' ], $args[ 'settings_key' ] )
                  ->withValue( $value )
                  ->build();
+    }
+
+    public static function validate_settings( $values ) {
+
+        $validator = new Utils\Validation( Plugin::prefix( 'messages' ) );
+        $old_values = get_option( self::$settings_key );
+        $no_errors = TRUE;
+
+        foreach ( array_keys( $values ) as &$field ) {
+            $invoke_target = array( $validator, 'invalid_' . $field );
+            if ( method_exists ( ...$invoke_target ) ) {
+                 if ( $error = call_user_func_array( $invoke_target, array( &$values ) ) ) {
+                    $no_errors = FALSE;
+                    SettingsModel::debug( $error );
+                    add_settings_error(...$error);
+                    if ( array_key_exists( $field, $old_values ) )
+                        $values[ $field ] = $old_values[ $field ];
+                }
+            } else
+                SettingsModel::debug(
+                    "Skipping validation for field '$field' due to undefined validator"
+                );
+        }
+
+        if ( $no_errors )
+            $message = __( 'Settings saved', Plugin::PREFIX );
+        else if ( $values != $old_values )
+            $message = __( 'Settings partially saved', Plugin::PREFIX );
+
+        if ( $values_persisted = isset( $message ) )
+            add_settings_error(
+                $validator->slug,
+                Plugin::prefix( 'message' ),
+                $message,
+                'updated'
+            );
+
+        return $values;
     }
 
     /**
