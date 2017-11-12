@@ -40,7 +40,5 @@ if ( !defined( 'GISYNCCP_FILE' ) ) {
 	    $file = '/' . implode( '/', $path );
 	    if ( file_exists( $file ) ) require_once $file;
 	} );
-
-    $plugin = new GISyncCP\Plugin();
-    $plugin->bind_hooks();
 })();
+$gisync_cp_plugin = new GISyncCP\Plugin( GiSyncCp\Plugin::WITH_HOOKS_BINDING );

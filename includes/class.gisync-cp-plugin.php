@@ -15,6 +15,10 @@
 
      const VERSION = '0.0.1';
 
+     const WITH_HOOKS_BINDING = TRUE;
+
+     const MINIMAL_PHP_VERSION = '5.6.0';
+
      /**
       * The current version of the plugin.
       *
@@ -33,14 +37,24 @@
       *
       * @since    1.0.0
       */
-     public function __construct() {
+     public function __construct( $do_hooks_binding = FALSE ) {
 
          $this->version = Plugin::VERSION;
+
+         if ( $do_hooks_binding )
+            $this->bind_hooks();
      }
 
      public static function activation() {
 
-         $key = Plugin::PREFIX . '_version';
+         if ( version_compare( PHP_VERSION, MINIMAL_PHP_VERSION ) < 0 )
+            wp_die(
+                'This plugin requires at least PHP '.MINIMAL_PHP_VERSION.' version',  //message
+                'PHP version compatibility check failed',  // title
+                array( 'back_link' => TRUE )  //arguments
+            );
+
+         $key = Plugin::prefix( 'version' );
          $installed_version = get_option( $key );
          Plugin::debug( 'plugin version ' .  $installed_version ?: 'fist install' );
 
@@ -61,11 +75,10 @@
      public function settings_panel() {
 
          $settings = new SettingsModel(
-             plugin_dir_path( GISYNCCP_FILE ).'includes/data/setting-fields.yaml'
+             plugin_dir_path( GISYNCCP_FILE ).'includes/data/setting-fields.yaml',
+             SettingsModel::START_GENERATE_PAGE
          );
-         $settings->generate_page();
-
-        Plugin::debug( 'end' );
+         $this->model = $settings->data;
      }
 
      public function admin_menu() {

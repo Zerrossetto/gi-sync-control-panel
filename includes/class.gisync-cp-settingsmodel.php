@@ -4,11 +4,16 @@ namespace GISyncCP;
 class SettingsModel {
     use Utils\Logging;
 
+    const START_GENERATE_PAGE = TRUE;
+
     /**
      *
      */
-    function __construct( $yaml ) {
+    function __construct( $yaml, $do_generate_page = FALSE ) {
         $this->data = yaml_parse_file( $yaml );
+
+        if ( $do_generate_page )
+            $this->generate_page();
     }
 
     /**
@@ -33,9 +38,20 @@ class SettingsModel {
      *
      */
     public static function default_field_callback( $args ) {
-        $key = $args[ Plugin::prefix( 'field' ) ];
-        $setting = get_option( $key ) ?: '';
-        echo '<input type="text" name="'.$key.'" value="'.esc_attr( $setting ).'"s/>';
+
+        $tag = new Utils\DOMBuilder();
+
+        $all_settings = get_option( $args[ 'settings_key' ] ) ?: array();
+
+        if ( array_key_exists( $args[ 'label_for' ], $all_settings ) )
+            $value = $all_settings[ $args[ 'label_for' ] ];
+        else
+            $value = '';
+
+        echo $tag->input()
+                 ->named( $args[ 'label_for' ], $args[ 'settings_key' ] )
+                 ->withValue( $value )
+                 ->build();
     }
 
     /**
@@ -72,7 +88,7 @@ class SettingsModel {
             $section,
             array_merge(
                 $field[ 'args' ],
-                array( 'gisync_cp_field' => $field[ 'id' ] )
+                array( 'settings_key' => $this->data[ 'settings_key' ] )
             )
         );
     }

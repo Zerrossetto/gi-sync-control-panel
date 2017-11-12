@@ -2,7 +2,7 @@
 namespace GISyncCP\Utils;
 
 trait Logging {
-    public static function debug ( $log )  {
+    public static function debug ( ...$log_args )  {
        if ( WP_DEBUG ) {
 
           $caller = debug_backtrace()[1];
@@ -12,11 +12,15 @@ trait Logging {
           } else {
               $to_log = $caller[ 'function' ] . ' :: ';
           }
-          if ( is_array( $log ) || is_object( $log ) ) {
-               $to_log = $to_log . print_r( $log, true );
-          } else {
-               $to_log = $to_log . $log;
+
+          foreach ( $log_args as &$log ) {
+              if ( is_array( $log ) || is_object( $log ) ) {
+                   $to_log = $to_log . print_r( $log, true ) . ' ';
+              } else {
+                   $to_log = $to_log . $log . ' ';
+              }
           }
+
           error_log( $to_log );
        }
     }

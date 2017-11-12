@@ -10,17 +10,17 @@ sections:
   - GISyncCP\SettingsModel
   - default_section_callback
   fields:
-  - id: gisync_cp_field_gi_homepage
+  - id: gi_homepage
     title: Homepage GI
     args:
-      label_for: gisync_cp_field_gi_homepage
+      label_for: gi_homepage
       class: gisync_cp_field
-  - id: gisync_cp_field_connection_timeout
+  - id: connection_timeout
     title: Connection timeout
     callback:
     - GISyncCP\SettingsModel
     - default_field_callback
     args:
-      label_for: gisync_cp_field_connection_timeout
+      label_for: connection_timeout
       class: gisync_cp_field
 ...
