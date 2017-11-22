@@ -1,21 +1,24 @@
 <?php
 namespace GISyncCP;
 
-class Rest {
+class Rest
+{
     use Utils\Logging;
 
-    public static function all_settings() {
+    public static function all_settings()
+    {
         return new \WP_REST_Response(
             \get_option( 'gisync_cp_options' ),
             200
         );
     }
 
-    public static function agency_settings( $request ) {
+    public static function agency_settings($request)
+    {
 
         $sequence = $request[ 'sequence' ];
 
-        if ( !is_numeric( $sequence ) )
+        if (!is_numeric( $sequence )) {
             return new \WP_REST_Response(
                 array(
                     'code' => 'bad-request',
@@ -23,14 +26,16 @@ class Rest {
                 ),
                 400
             );
+        }
 
         $options = \get_option( 'gisync_cp_options' );
 
-        if ( array_key_exists( $sequence, $options[ 'agencies' ] ) )
+        if (array_key_exists( $sequence, $options[ 'agencies' ] )) {
             return new \WP_REST_Response(
                 $options[ 'agencies' ][ $sequence ],
                 200
             );
+        }
 
         return new \WP_REST_Response(
             array(
