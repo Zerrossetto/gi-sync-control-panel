@@ -1,7 +1,7 @@
 <?php
 use GISyncCP\Plugin;
 
-if ( !current_user_can( 'manage_options' ) ) {
+if (!current_user_can( 'manage_options' )) {
     Plugin::debug( 'Current user doesn\'t have grants to access settings page' );
     return;
 }
