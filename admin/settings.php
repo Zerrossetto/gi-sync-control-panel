@@ -26,7 +26,7 @@ switch ( $this->current_tab ) {
     case 'general':
     case 'agency':
         echo '<form action="options.php" method="post">';
-        settings_fields( Plugin::PREFIX );
+        settings_fields( $this->model->data[ 'option_name' ] );
         do_settings_sections( $this->model->data[ 'page' ] );
         submit_button( 'Save Settings' );
         echo '</form>';

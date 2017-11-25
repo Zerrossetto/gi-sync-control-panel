@@ -48,7 +48,7 @@ class GeneralSettingsViewModel
 
         if (array_key_exists( 'option_name', $this->data )) {
             register_setting(
-                Plugin::PREFIX, //option_group
+                $this->data[ 'option_name' ], //option_group
                 $this->data[ 'option_name' ],
                 array(
                     'description' => $this->data[ 'description' ],
@@ -138,25 +138,23 @@ class GeneralSettingsViewModel
     public function validate_input($new_values, $old_values)
     {
         $validator = new Utils\Validation( Plugin::prefix( 'messages' ) );
-        $old_values = $this->setting_for_model();
         $no_errors = true;
 
-        // FIXME: WP is returning null and I don't know why, to invetigate
-        /*array_walk_recursive(
+        array_walk_recursive(
             $new_values,
             function ($item, $key) use (&$new_values, &$validator, &$old_values, &$no_errors) {
                 $invoke_target = array( $validator, 'invalid_' . $key );
                 if (method_exists ( ...$invoke_target )) {
-                    if ($error = call_user_func_array( $invoke_target, array( &$values ) )) {
+                    if ($error = call_user_func_array( $invoke_target, array( &$new_values ) )) {
                         $no_errors = false;
                         add_settings_error(...$error);
                         if (array_key_exists( $key, $old_values )) {
-                            $values[ $key ] = $old_values[ $key ];
+                            $new_values[ $key ] = $old_values[ $key ];
                         }
                     }
                 }
             }
-        );*/
+        );
 
         if ($no_errors) {
             $message = __( 'Settings saved', Plugin::PREFIX );
@@ -210,16 +208,27 @@ class GeneralSettingsViewModel
         return $tag;
     }
 
-    protected function setting_for_model($option_name = null)
+    protected function global_setting_for_model($option_name = null, $use_cache = true)
+    {
+        return setting_for_model($option_name, false, $use_cache);
+    }
+
+    protected function uncached_setting_for_model($option_name = null, $local_option = true)
+    {
+        return setting_for_model($option_name, $local_option, false);
+    }
+
+    protected function setting_for_model($option_name = null, $local_option = true, $use_cache = true)
     {
         if (!isset($option_name)) {
             $option_name = $this->data[ 'option_name' ];
         }
         if (!property_exists( $this, 'all_settings' )) {
-            $this->all_settings = get_option( $option_name ) ?: array();
-            $this->debug('got option', $option_name, 'with', $this->all_settings);
-        } else {
-            $this->debug('cached option', $option_name, 'with', $this->all_settings);
+            if ($local_option) {
+                $this->all_settings = get_option( $option_name, false, $use_cache ) ?: array();
+            } else {
+                $this->all_settings = get_site_option( $option_name, false, $use_cache ) ?: array();
+            }
         }
 
         return $this->all_settings;

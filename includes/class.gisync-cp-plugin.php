@@ -32,6 +32,15 @@ class Plugin
     protected $version;
 
     /**
+     * An instance of type *ViewModel
+     *
+     * @since 1.0.0.
+     *
+     * @var stdClass The view model instance for the setting page
+     */
+    public $model;
+
+    /**
       * Define the core functionality of the plugin.
       *
       * Set the plugin name and the plugin version that can be used throughout the plugin.
@@ -160,20 +169,19 @@ class Plugin
           new GeneralSettingsViewModel( self::yaml( 'general-settings-fields' ) ),
           new AgencySettingsViewModel( self::yaml( 'agency-settings-fields' ) )
         );
-        $prefix_present = array_key_exists( self::PREFIX, $whitelist );
 
         foreach ($models as &$model) {
             $option = $model->data[ 'option_name' ];
-            if ($prefix_present && !in_array( $option, $whitelist[ self::PREFIX ] )) {
-                array_push( $whitelist[ self::PREFIX ], $option );
+            $prefix_present = array_key_exists( $option, $whitelist );
+            if ($prefix_present && !in_array( $option, $whitelist[ $option ] )) {
+                array_push( $whitelist[ $option ], $option );
             } elseif (!$prefix_present) {
-                $whitelist[ self::PREFIX ] = array( $option );
+                $whitelist[ $option ] = array( $option );
             }
         }
 
         return $whitelist;
     }
-
 
     public function bind_hooks()
     {
