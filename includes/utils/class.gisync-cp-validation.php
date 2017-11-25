@@ -48,8 +48,14 @@ class Validation
         } elseif (!self::is_numeric( $values [ 'connection_timeout' ] )) {
             return array(
                 $this->slug,
-                'connection-timeout-invalid-number',
+                'connection-timeout-invalid-value',
                 'Expected numeric value for Connection timeout, gotten '.$values[ 'connection_timeout' ].' instead '
+            );
+        } elseif (intval($values [ 'connection_timeout' ]) <= 0) {
+            return array(
+              $this->slug,
+              'connection-timeout-invalid-value',
+              'Connection timeout value must be greater than 0'
             );
         }
     }
