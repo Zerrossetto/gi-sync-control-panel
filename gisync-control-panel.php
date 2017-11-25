@@ -46,5 +46,6 @@ if (!defined( 'GISYNCCP_FILE' )) {
             require_once $file;
         }
     } );
+
+    $gisync_cp_plugin = new GISyncCP\Plugin( GiSyncCp\Plugin::WITH_HOOKS_BINDING );
 })();
-$gisync_cp_plugin = new GISyncCP\Plugin( GiSyncCp\Plugin::WITH_HOOKS_BINDING );

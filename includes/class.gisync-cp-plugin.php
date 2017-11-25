@@ -11,6 +11,8 @@
 class Plugin
 {
     use Utils\Logging;
+    use Utils\NavigationMixins;
+    use Utils\FileSystemMixins;
 
     const PREFIX = 'gisync_cp';
 
@@ -83,42 +85,57 @@ class Plugin
 
     public static function uninstall()
     {
-        // delete existing tables
+        // delete existing tables but, HEY! THERE AREN'T!!1!
     }
 
     public function settings_panel()
     {
+        $this->current_tab = self::current_tab();
 
-        $settings = new SettingsModel(
-            plugin_dir_path( GISYNCCP_FILE ).'includes/data/setting-fields.yaml',
-            SettingsModel::START_GENERATE_PAGE
-        );
-        $this->model = $settings->data;
+        switch ($this->current_tab) {
+            case 'general':
+                $this->model = new GeneralSettingsViewModel(
+                self::yaml( 'general-settings-fields' ),
+                GeneralSettingsViewModel::START_GENERATE_PAGE
+                );
+                break;
+            case 'agency':
+                $this->model = new AgencySettingsViewModel(
+                  self::yaml( 'agency-settings-fields-template' ),
+                  AgencySettingsViewModel::START_GENERATE_PAGE
+                );
+                break;
+            default:
+                wp_die(
+                'Invalid tab selector',
+                'Unexpected error',
+                array( 'back_link' => true )
+                );
+        }
+
+        require_once( self::page_path( 'settings' ) );
     }
 
     public function admin_menu()
     {
-        wp_register_style(
-            $this->prefix( 'settings_panel' ),
-            plugin_dir_url(GISYNCCP_FILE) . 'admin/css/gisync-control-panel.css'
-        );
+        wp_register_style( self::prefix( 'settings_panel' ), self::stylesheet( 'gisync-control-panel' ) );
         add_management_page(
             'GI Sync',
             'GI Sync',
             'manage_options',
-            plugin_dir_path( GISYNCCP_FILE ) . '/admin/settings.php',
-            null
+            $this->prefix( 'settings' ),
+            array( $this, 'settings_panel' )
         );
     }
 
     public function enqueue_scripts()
     {
-        wp_enqueue_style( $this->prefix( 'settings_panel' ) );
+        wp_enqueue_style( self::prefix( 'settings_panel' ) );
     }
 
     public function rest_endpoint()
     {
-        $namespace = self::PREFIX . '/v1';
+        $namespace = self::prefix( 'v1', '/' );
         register_rest_route(
             $namespace,
             '/settings',
@@ -137,20 +154,44 @@ class Plugin
         );
     }
 
+    public function whitelist_custom_options($whitelist)
+    {
+        $models = array (
+          new GeneralSettingsViewModel( self::yaml( 'general-settings-fields' ) ),
+          new AgencySettingsViewModel( self::yaml( 'agency-settings-fields' ) )
+        );
+        $prefix_present = array_key_exists( self::PREFIX, $whitelist );
+
+        foreach ($models as &$model) {
+            $option = $model->data[ 'option_name' ];
+            if ($prefix_present && !in_array( $option, $whitelist[ self::PREFIX ] )) {
+                array_push( $whitelist[ self::PREFIX ], $option );
+            } elseif (!$prefix_present) {
+                $whitelist[ self::PREFIX ] = array( $option );
+            }
+        }
+
+        return $whitelist;
+    }
+
+
     public function bind_hooks()
     {
 
         if (is_admin()) {
-            $hooks = array( 'activation', 'deactivation', 'uninstall' );
-            foreach ($hooks as &$hook) {
+            foreach (array( 'activation', 'deactivation', 'uninstall' ) as &$hook) {
                 Plugin::bind_hook_internal( $hook );
             }
         }
 
         add_action( 'admin_menu', array( $this, 'admin_menu') );
-        add_action( 'admin_init', array( $this, 'settings_panel') );
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
         add_action( 'rest_api_init', array( $this, 'rest_endpoint' ) );
+        add_action(
+          'whitelist_options',
+          array( $this, 'whitelist_custom_options' ),
+          11
+        );
     }
 
     private static function bind_hook_internal($hook)
@@ -159,8 +200,8 @@ class Plugin
         $hook_function( GISYNCCP_FILE, array( __CLASS__, $hook ) );
     }
 
-    public static function prefix($setting_name)
+    public static function prefix($setting_name, $sep = '_')
     {
-        return self::PREFIX . '_' . $setting_name;
+        return self::PREFIX . $sep . $setting_name;
     }
 }

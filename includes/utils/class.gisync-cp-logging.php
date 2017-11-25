@@ -14,11 +14,18 @@ trait Logging
                 $to_log = $caller[ 'function' ] . ' :: ';
             }
 
+            $last = end($log_args);
+
             foreach ($log_args as &$log) {
-                if (is_array( $log ) || is_object( $log )) {
-                     $to_log = $to_log . print_r( $log, true ) . ' ';
+                if (!isset($log)) {
+                    $to_log = $to_log . 'null';
+                } elseif (is_array( $log ) || is_object( $log )) {
+                    $to_log = $to_log . print_r( $log, true );
                 } else {
-                    $to_log = $to_log . $log . ' ';
+                    $to_log = $to_log . $log;
+                }
+                if ($log !== $last) {
+                    $to_log = $to_log . ' ';
                 }
             }
 
