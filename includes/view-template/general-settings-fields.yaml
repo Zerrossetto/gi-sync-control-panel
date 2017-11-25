@@ -1,0 +1,23 @@
+---
+page: gisync_cp_settings
+page_title: GI Sync process settings
+description: Global settings for GI Sync Process
+option_name: gisync_cp_general
+show_in_rest: true
+sections:
+- id: gisync_cp_general_section
+  title: General settings
+  callback: section_subtitle_echo
+  fields:
+  - id: gi_homepage
+    title: Homepage GI
+    callback: text_field_echo
+    args:
+      label_for: gi_homepage
+      class: gisync_cp_field
+  - id: connection_timeout
+    title: Connection timeout
+    callback: numeric_field_echo
+    args:
+      label_for: connection_timeout
+      class: gisync_cp_field

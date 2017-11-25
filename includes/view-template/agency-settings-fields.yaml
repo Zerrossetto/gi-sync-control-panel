@@ -1,0 +1,67 @@
+---
+page: gisync_cp_settings
+page_title: GI Sync process agency settings
+description: Agency settings for GI Sync Process
+option_name: gisync_cp_agency
+show_in_rest: true
+sections:
+- id: gisync_cp_agency_section
+  title: Impostazioni Agenzia San Michele
+  callback: section_subtitle_echo
+  fields:
+  - id: gi_id
+    title: Identificativo agenzia su GI
+    callback: disabled_text_field_echo
+    args:
+      label_for: gi_id
+      class: gisync_cp_field
+      default_value: 123fantecavallo
+  - id: agency_homepage
+    title: Agency Homepage
+    callback: text_field_echo
+    args:
+      label_for: agency_homepage
+      class: gisync_cp_field
+  - id: description
+    title: Agency description
+    callback: text_field_echo
+    args:
+      label_for: description
+      class: gisync_cp_field
+  - id: export_url
+    title: GI Feeds URL
+    callback: text_field_echo
+    args:
+      label_for: export_url
+      class: gisync_cp_field
+  - id: opt
+    title: Additional export data
+    callback: checkbox_fields_echo
+    args:
+      label_for: opt
+      class: gisync_cp_field
+      checkbox_fields:
+      - i18n
+      - video
+      - virtual
+      - latlng
+      - geo_id
+      - flag_storico
+      - note_nascoste
+      - abstract
+      - finiture
+      - micro_categorie
+      - stima
+      - ind_reale
+      - agente
+      - persone
+  - id: image
+    title: Image manipulation options
+    callback: checkbox_fields_echo
+    args:
+      label_for: image
+      class: gisync_cp_field
+      checkbox_fields:
+      - resize
+      - normalize
+      - apply_watermark
