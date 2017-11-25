@@ -60,23 +60,123 @@ class Validation
         }
     }
 
-    public function invalid_abstract(&$values) {
-      return validate_checkbox_value('abstract', $values);
+
+/*
+ * ============================================================================
+ * ==                    GI OPTION FLAGS VALIDATION                          ==
+ * ============================================================================
+ */
+
+    public function invalid_abstract(&$values)
+    {
+        return $this->validate_checkbox('abstract', $values[ 'opt' ] );
     }
 
-    private function validate_checkbox_value($checkbox_name, &$values) {
-      if (!array_key_exists( $checkbox_name, $values )) {
-        return array(
+    public function invalid_agente(&$values)
+    {
+        return $this->validate_checkbox('agente', $values[ 'opt' ] );
+    }
+
+    public function invalid_finiture(&$values)
+    {
+        return $this->validate_checkbox('finiture', $values[ 'opt' ] );
+    }
+
+    public function invalid_flag_storico(&$values)
+    {
+        return $this->validate_checkbox('flag_storico', $values[ 'opt' ] );
+    }
+
+    public function invalid_geo_id(&$values)
+    {
+        return $this->validate_checkbox('geo_id', $values[ 'opt' ] );
+    }
+
+    public function invalid_i18n(&$values)
+    {
+        return $this->validate_checkbox('i18n', $values[ 'opt' ] );
+    }
+
+    public function invalid_ind_reale(&$values)
+    {
+        return $this->validate_checkbox('ind_reale', $values[ 'opt' ] );
+    }
+
+    public function invalid_latlng(&$values)
+    {
+        return $this->validate_checkbox('latlng', $values[ 'opt' ] );
+    }
+
+    public function invalid_micro_categorie(&$values)
+    {
+        return $this->validate_checkbox('micro_categorie', $values[ 'opt' ] );
+    }
+
+    public function invalid_note_nascoste(&$values)
+    {
+        return $this->validate_checkbox('note_nascoste', $values[ 'opt' ] );
+    }
+
+    public function invalid_persone(&$values)
+    {
+        return $this->validate_checkbox('persone', $values[ 'opt' ] );
+    }
+
+    public function invalid_stima(&$values)
+    {
+        return $this->validate_checkbox('stima', $values[ 'opt' ] );
+    }
+
+    public function invalid_video(&$values)
+    {
+        return $this->validate_checkbox('video', $values[ 'opt' ] );
+    }
+
+    public function invalid_virtual(&$values)
+    {
+        return $this->validate_checkbox('virtual', $values[ 'opt' ] );
+    }
+
+/*
+ * ============================================================================
+ * ==              IMAGE MANIPULATION FLAGS VALIDATION                       ==
+ * ============================================================================
+ */
+
+    public function invalid_apply_watermark(&$values)
+    {
+         return $this->validate_checkbox('apply_watermark', $values[ 'image' ] );
+    }
+
+    public function invalid_normalize(&$values)
+    {
+         return $this->validate_checkbox('normalize', $values[ 'image' ] );
+    }
+    public function invalid_resize(&$values)
+    {
+         return $this->validate_checkbox('resize', $values[ 'image' ] );
+    }
+
+/*
+ * ============================================================================
+ * ==                            UTILITIES                                   ==
+ * ============================================================================
+ */
+
+    private function validate_checkbox($name, &$values)
+    {
+        if (!array_key_exists( $name, $values )) {
+            return array(
             $this->slug,
             'checkbox-key-not-present',
-            'Internal error, Checkbox '. $checkbox_name .' should be present'
-        );
-      } elseif (!in_array( intval($values[ $checkbox_name ]), array( 0, 1 ))) {
-        return array(
+            'Internal error, Checkbox '. $name .' should be present'
+            );
+        } elseif (!in_array( intval($values[ $name ]), array( 0, 1 ))) {
+            return array(
             $this->slug,
             'checkbox-invalid-value',
-            'Unexpected value for checkbox '. $checkbox_name .'. Gotten '. $values[ $checkbox_name ]
-        );
-      }
+            'Unexpected value for checkbox '. $name .'. Gotten '. $values[ $name ]
+            );
+        }
     }
 }
