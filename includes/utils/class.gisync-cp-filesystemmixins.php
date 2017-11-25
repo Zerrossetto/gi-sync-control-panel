@@ -14,7 +14,7 @@ trait FileSystemMixins
     }
 
     public static function stylesheet( $resource, $section = 'admin' ) {
-      return plugin_dir_path( GISYNCCP_FILE ) . $section . '/css/'. $resource . '.css';
+      return plugin_dir_url( GISYNCCP_FILE ) . $section . '/css/'. $resource . '.css';
     }
 
     public static function javacript( $resource, $section = 'admin' ) {

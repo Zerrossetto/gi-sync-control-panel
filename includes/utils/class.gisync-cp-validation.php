@@ -59,4 +59,24 @@ class Validation
             );
         }
     }
+
+    public function invalid_abstract(&$values) {
+      return validate_checkbox_value('abstract', $values);
+    }
+
+    private function validate_checkbox_value($checkbox_name, &$values) {
+      if (!array_key_exists( $checkbox_name, $values )) {
+        return array(
+            $this->slug,
+            'checkbox-key-not-present',
+            'Internal error, Checkbox '. $checkbox_name .' should be present'
+        );
+      } elseif (!in_array( intval($values[ $checkbox_name ]), array( 0, 1 ))) {
+        return array(
+            $this->slug,
+            'checkbox-invalid-value',
+            'Unexpected value for checkbox '. $checkbox_name .'. Gotten '. $values[ $checkbox_name ]
+        );
+      }
+    }
 }

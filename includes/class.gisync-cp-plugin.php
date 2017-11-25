@@ -64,7 +64,7 @@ class Plugin
 
         if (version_compare( PHP_VERSION, self::MIN_PHP_VERSION ) < 0) {
             trigger_error(
-            'This plugin requires at least PHP '.self::MIN_PHP_VERSIONN.' version',
+            'This plugin requires at least PHP '.self::MIN_PHP_VERSION.' version',
             E_USER_ERROR
             );
         }
@@ -110,7 +110,7 @@ class Plugin
                 break;
             case 'agency':
                 $this->model = new AgencySettingsViewModel(
-                  self::yaml( 'agency-settings-fields-template' ),
+                  self::yaml( 'agency-settings-fields' ),
                   AgencySettingsViewModel::START_GENERATE_PAGE
                 );
                 break;
@@ -127,7 +127,10 @@ class Plugin
 
     public function admin_menu()
     {
-        wp_register_style( self::prefix( 'settings_panel' ), self::stylesheet( 'gisync-control-panel' ) );
+        wp_register_style(
+          self::prefix( 'settings_panel' ),
+          self::stylesheet( 'gisync-control-panel' )
+        );
         add_management_page(
             'GI Sync',
             'GI Sync',
@@ -139,7 +142,10 @@ class Plugin
 
     public function enqueue_scripts()
     {
-        wp_enqueue_style( self::prefix( 'settings_panel' ) );
+        $screen = get_current_screen();
+        if (property_exists($screen, 'id') && $screen->id === 'tools_page_gisync_cp_settings') {
+            wp_enqueue_style( self::prefix( 'settings_panel' ) );
+        }
     }
 
     public function rest_endpoint()

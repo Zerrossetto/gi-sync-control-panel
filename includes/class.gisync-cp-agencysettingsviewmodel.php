@@ -9,7 +9,7 @@ class AgencySettingsViewModel extends GeneralSettingsViewModel
         echo $this->prepare_input( $args )->disabled()->build();
     }
 
-    public function checkbox_fields_callback($args)
+    public function checkbox_fields_echo($args)
     {
         $builder = new Utils\DOMBuilder();
         $all_values = $this->setting_for_model();
@@ -26,7 +26,7 @@ class AgencySettingsViewModel extends GeneralSettingsViewModel
             }
         }
 
-        ksort( $values, SORT_STRING );
+        ksort( $checkbox_values, SORT_STRING );
 
         echo $builder->divForCheckboxes()
                      ->withCheckboxElements(
