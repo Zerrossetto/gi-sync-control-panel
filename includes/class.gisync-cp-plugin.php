@@ -53,9 +53,9 @@ class Plugin
     public static function activation()
     {
 
-        if (version_compare( PHP_VERSION, MIN_PHP_VERSION ) < 0) {
+        if (version_compare( PHP_VERSION, self::MIN_PHP_VERSION ) < 0) {
             trigger_error(
-            'This plugin requires at least PHP '.MIN_PHP_VERSION.' version',
+            'This plugin requires at least PHP '.self::MIN_PHP_VERSIONN.' version',
             E_USER_ERROR
             );
         }
