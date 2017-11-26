@@ -4,6 +4,22 @@ namespace GISyncCP;
 class AgencySettingsViewModel extends GeneralSettingsViewModel
 {
 
+
+    function __construct($yaml, $do_generate_page = false)
+    {
+        parent::__construct( $yaml, $do_generate_page );
+        $this->local_setting = true;
+    }
+/*
+ * ============================================================================
+ * ==                           CALLBACKS SECTION                            ==
+ * ============================================================================
+ */
+    public function section_subtitle_echo()
+    {
+        echo '<p>GI Agency process settings.</p>';
+    }
+
     public function disabled_text_field_echo($args)
     {
         echo $this->prepare_input( $args )->disabled()->build();

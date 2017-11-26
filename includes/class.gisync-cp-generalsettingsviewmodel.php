@@ -4,11 +4,18 @@ namespace GISyncCP;
 class GeneralSettingsViewModel
 {
     use Utils\Logging;
-    use Utils\NavigationMixins;
 
     const START_GENERATE_PAGE = true;
 
-    private static $option_name;
+    /**
+      * The current version of the plugin.
+      *
+      * @since    1.0.0
+      *
+      * @var boolean True if the setting mapped by the model is blog-specifi
+      *              if multisite, false if is a site-wide setting
+      */
+    protected $local_setting;
 
     /**
      *
@@ -26,10 +33,12 @@ class GeneralSettingsViewModel
             $this->generate_page();
         }
 
+        $this->local_setting = false;
+
         add_filter(
          'pre_update_option_' . $this->data[ 'option_name'],
          array( $this, 'validate_input' ),
-         11, // priority
+         10, // priority
          2   // number of args
         );
     }
@@ -101,6 +110,20 @@ class GeneralSettingsViewModel
             $section_ref,
             $field[ 'args' ]
         );
+    }
+
+    public function do_tabbed_navigation() {
+
+      $tabs = new Utils\DOMBuilder();
+      $tabs->tabsNavigationBar();
+      $tab_data = array( 'general' => 'General Options', 'agency' => 'Agency Options');
+      $base_url = menu_page_url( 'gisync_cp_settings', false );
+
+      foreach ($tab_data as $id => $description) {
+        $tabs->addTab( $id, $description, $base_url, self::current_tab() === $id );
+      }
+
+      echo $tabs->build();
     }
 
 /*
@@ -232,5 +255,13 @@ class GeneralSettingsViewModel
         }
 
         return $this->all_settings;
+    }
+
+    public static function current_tab() {
+      if (array_key_exists( 'tab', $_GET )) {
+          return $_GET['tab'];
+      } else {
+          return 'general';
+      }
     }
 }

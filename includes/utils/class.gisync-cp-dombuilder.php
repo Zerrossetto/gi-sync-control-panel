@@ -32,6 +32,14 @@ class DOMBuilder
         return $this;
     }
 
+    function tabsNavigationBar()
+    {
+        $this->node = $this->doc->createElement( 'h2' );
+        $this->node->setAttribute( 'class', 'nav-tab-wrapper' );
+        $this->doc->appendChild( $this->node );
+        return $this;
+    }
+
     function named($name, $group = null)
     {
 
@@ -90,6 +98,22 @@ class DOMBuilder
 
             $this->node->appendChild( $label );
         }
+        return $this;
+    }
+
+    function addTab($id, $description, $base_url, $active_tab = false)
+    {
+        $anchor = $this->doc->createElement( 'a', $description );
+        $anchor->setAttribute(
+          'href',
+          menu_page_url( 'gisync_cp_settings', false ) . '&tab=' . urlencode( $id )
+        );
+        $anchor->setAttribute(
+          'class',
+          $active_tab ? 'nav-tab nav-tab-active' : 'nav-tab'
+        );
+        $this->node->appendChild( $anchor );
+
         return $this;
     }
 

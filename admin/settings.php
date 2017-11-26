@@ -12,16 +12,10 @@ use GISyncCP\Plugin;
 <div class="wrap">
 
     <h2><?= esc_html( $this->model->data[ 'page_title' ] ); ?></h2>
-    <?php settings_errors( $this->prefix( 'messages' ) ); ?>
-
-    <h2 class="nav-tab-wrapper">
-        <?php foreach(array( 'general' => 'General Options', 'agency' => 'Agency Options') as $id => $description) { ?>
-        <a href="<?=  $this->tab_url( $id ) ?>" class="nav-tab<?=  $this->active_class_if_active( $id ) ?>">
-          <?= $description ?>
-        </a>
-      <?php } ?>
-    </h2>
 <?php
+$this->model->do_tabbed_navigation();
+settings_errors( $this->prefix( 'messages' ) );
+
 switch ( $this->current_tab ) {
     case 'general':
     case 'agency':

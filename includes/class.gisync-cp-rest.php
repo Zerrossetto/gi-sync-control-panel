@@ -7,22 +7,30 @@ class Rest
 
     public static function all_settings()
     {
-        return new \WP_REST_Response(
-            \get_option( 'gisync_cp_options' ),
-            200
-        );
+        if (is_multisite()) {
+          $this->debug(get_sites());
+          return new \WP_REST_Response(
+              array( 'pippo' => 1, 'pluto' => 2 ),
+              200
+          );
+        } else {
+          return new \WP_REST_Response(
+              \get_option( 'gisync_cp_options' ),
+              200
+          );
+        }
     }
 
     public static function agency_settings($request)
     {
 
-        $sequence = $request[ 'sequence' ];
+        $blog_id = $request[ 'blog_id' ];
 
-        if (!is_numeric( $sequence )) {
+        if (!is_numeric( $blog_id )) {
             return new \WP_REST_Response(
                 array(
                     'code' => 'bad-request',
-                    'description' => "invalid sequence identifier '$sequence'"
+                    'description' => "invalid sequence identifier '$blog_id'"
                 ),
                 400
             );
@@ -40,7 +48,7 @@ class Rest
         return new \WP_REST_Response(
             array(
                 'code' => 'agency-not-found',
-                'description' => "agency nr. $sequence wasn't found"
+                'description' => "agency nr. $blog_id wasn't found"
             ),
             404
         );

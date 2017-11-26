@@ -11,7 +11,6 @@
 class Plugin
 {
     use Utils\Logging;
-    use Utils\NavigationMixins;
     use Utils\FileSystemMixins;
 
     const PREFIX = 'gisync_cp';
@@ -99,7 +98,7 @@ class Plugin
 
     public function settings_panel()
     {
-        $this->current_tab = self::current_tab();
+        $this->current_tab = GeneralSettingsViewModel::current_tab();
 
         switch ($this->current_tab) {
             case 'general':
@@ -151,22 +150,49 @@ class Plugin
     public function rest_endpoint()
     {
         $namespace = self::prefix( 'v1', '/' );
-        register_rest_route(
+
+        $id = get_current_blog_id();
+        $this->debug('current blog', $id, is_main_site($id) ? 'is main site' : 'is not the main site' );
+
+        if (is_multisite()) {
+            if (is_main_site($id)) {
+                register_rest_route(
+                  $namespace,
+                  '/settings',
+                  array(
+                      'methods' => 'GET',
+                      'callback' => array( 'GISyncCP\Rest', 'all_settings' )
+                  )
+                );
+                register_rest_route(
+                  $namespace,
+                  '/agency/(?P<blog_id>\d+)',
+                  array(
+                    'methods' => 'GET',
+                    'callback' => array( 'GISyncCP\Rest', 'agency_settings' )
+                  )
+                );
+            } else {
+                register_rest_route(
+                  $namespace,
+                  '/settings',
+                  array(
+                    'methods' => 'GET',
+                    'callback' => array( 'GISyncCP\Rest', 'agency_settings' )
+                  )
+                );
+            }
+        } else {
+          // not in multisite :_(
+          register_rest_route(
             $namespace,
             '/settings',
             array(
                 'methods' => 'GET',
                 'callback' => array( 'GISyncCP\Rest', 'all_settings' )
             )
-        );
-        register_rest_route(
-            $namespace,
-            '/agency/(?P<sequence>\d+)',
-            array(
-                'methods' => 'GET',
-                'callback' => array( 'GISyncCP\Rest', 'agency_settings' )
-            )
-        );
+          );
+        }
     }
 
     public function whitelist_custom_options($whitelist)
