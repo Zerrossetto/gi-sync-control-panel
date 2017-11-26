@@ -32,8 +32,8 @@ class Rest
 
       $json = self::get_general_options();
       $json[ 'agencies' ] = array( get_option( Plugin::prefix( 'agency' ), array() ) );
-      
-      return new \WP_REST_Response( $json, 200 );
+
+      return $json;
     }
 
     private static function multisite_all_settings()
@@ -56,7 +56,7 @@ class Rest
             }
         }
         $json[ 'agencies' ] = $agency_options;
-        return new \WP_REST_Response( $json, 200 );
+        return $json;
     }
 
     private static function public_active_sites($site, $index)
