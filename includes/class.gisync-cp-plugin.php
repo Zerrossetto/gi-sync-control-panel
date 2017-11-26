@@ -150,9 +150,7 @@ class Plugin
     public function rest_endpoint()
     {
         $namespace = self::prefix( 'v1', '/' );
-
         $id = get_current_blog_id();
-        $this->debug('current blog', $id, is_main_site($id) ? 'is main site' : 'is not the main site' );
 
         if (is_multisite()) {
             if (is_main_site($id)) {
